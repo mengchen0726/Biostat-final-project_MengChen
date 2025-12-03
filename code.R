@@ -404,11 +404,12 @@ ggsave(p, filename = paste0("./plots/Fig3_ORA_KEGG.png"),
 load("./data/step2_exp&group.RData")
 library(WGCNA)
 
+
 Pick_SFT <- function(top_sd_gene_number = 4000,
                      exp,
                      name,
                      RsquaredCut = 0.85){
-  apply(exp, 1, sd) %>% sort(.,decreasing = T) %>% head(., top_sd_gene_number) %>% names %>% exp1[.,] -> WGCNA_exp
+  apply(exp, 1, sd) %>% sort(.,decreasing = T) %>% head(., top_sd_gene_number) %>% names %>% exp[.,] -> WGCNA_exp
   
   t_exp <- t(WGCNA_exp)
   
@@ -421,7 +422,7 @@ Pick_SFT <- function(top_sd_gene_number = 4000,
   assign(paste0("po_", name), po, envir = .GlobalEnv)
   print(po)
   
-  png(paste0("./plots/Fig4_pick_SFT_", name, "RsquaredCut_", RsquaredCut,".png"), width = 900, height = 500)
+  png(paste0("./plots/Fig4_pick_SFT_", name, "_RsquaredCut_", RsquaredCut,".png"), width = 900, height = 500)
   
   par(mfrow = c(1,2));
   cex1 = 0.8;
@@ -436,7 +437,7 @@ Pick_SFT <- function(top_sd_gene_number = 4000,
        -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
        labels=powers,cex=cex1,col="red");
   
-  abline(h=0.85,col="red")
+  abline(h=RsquaredCut,col="red")
   
   plot(sft$fitIndices[,1], 
        sft$fitIndices[,5],
@@ -451,7 +452,10 @@ Pick_SFT <- function(top_sd_gene_number = 4000,
 }
 
 Pick_SFT(top_sd_gene_number = 10000, exp1, name = "exp1", RsquaredCut = 0.85)
-Pick_SFT(top_sd_gene_number = 10000, exp2, name = "exp2", RsquaredCut = 0.9)
+Pick_SFT(top_sd_gene_number = 10000, exp2, name = "exp2", RsquaredCut = 0.8)
+
+
+
 
 
 ###WGCNA-PD
@@ -644,7 +648,7 @@ save(MEs, moduleLabels, moduleColors, geneTree, file = "./data/step6_networkCons
 #Modules-traits relationships
 nGenes = ncol(t_exp2)
 nSamples = nrow(t_exp2)
-
+group2 <- factor(group2)
 design=model.matrix(~0+ group2)
 colnames(design)=levels(group2)
 moduleTraitCor = cor(MEs, design, use = "p")
@@ -660,7 +664,7 @@ textMatrix =  paste(signif(moduleTraitCor, 2),
                     ")", 
                     sep = "");
 dim(textMatrix) = dim(moduleTraitCor)
-textMatrix[1:6,1:2]
+textMatrix[1:4,1:2]
 
 design2 <- as.data.frame(design)
 png("./plots/Fig4_module_traits_relationship_exp2.png", width = 480, height = 720)
@@ -697,7 +701,7 @@ GSPvalue = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSam
 names(geneTraitSignificance) = paste("GS.", names(trait), sep="")
 names(GSPvalue) = paste("p.GS.", names(trait), sep="")
 
-module = "darkorange"
+module = "salmon"
 column = match(module, modNames);
 moduleGenes = mergedColors == module;
 
@@ -711,7 +715,7 @@ verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
                    cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
 dev.off()
 
-pSS_module <- colnames(t_exp2)[mergedColors == "darkorange"]
+pSS_module <- colnames(t_exp2)[mergedColors == "salmon"]
 pSS_module
 save(pSS_module, file = "./data/step6_WGCNA_pSS_module.RData")
 
